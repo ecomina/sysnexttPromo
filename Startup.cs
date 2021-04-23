@@ -33,6 +33,15 @@ namespace Authentic
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("EnableCORS", builder =>
+                {
+                    builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().Build();
+                });
+            });
+
             services.Configure<JwtConfig>(Configuration.GetSection("JwtConfig"));
 
             services.AddDbContext<DaoContext>(options => 
@@ -77,6 +86,8 @@ namespace Authentic
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Authentic v1"));
             }
+
+            app.UseCors("EnableCORS");
 
             app.UseHttpsRedirection();
 
