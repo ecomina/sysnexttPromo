@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "5ara1WLre7Ja47UaNk+0wa5NuD7lB8y0EfytsFeo9/JcrzZ65Ffgy/hDYKFWWJedxJcKYPd0JGXoPwJUxTaLDA==",
+  "dgSpecHash": "vvmS0lTOzArFGwI0QaUqX6Q8vc2bUGDkCR7USrhx4kpVAaj3nCPcvfXvtOqasvLBlEwIEbQQVrWqXJaQ4hs6oQ==",
   "success": true,
   "projectFilePath": "E:\\dev\\netCore_api\\Authentic\\Authentic.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\eriso\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
+    "C:\\Users\\eriso\\.nuget\\packages\\microsoft.aspnetcore.authentication.certificate\\5.0.5\\microsoft.aspnetcore.authentication.certificate.5.0.5.nupkg.sha512",
     "C:\\Users\\eriso\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\5.0.5\\microsoft.aspnetcore.authentication.jwtbearer.5.0.5.nupkg.sha512",
     "C:\\Users\\eriso\\.nuget\\packages\\microsoft.aspnetcore.cryptography.internal\\5.0.5\\microsoft.aspnetcore.cryptography.internal.5.0.5.nupkg.sha512",
     "C:\\Users\\eriso\\.nuget\\packages\\microsoft.aspnetcore.cryptography.keyderivation\\5.0.5\\microsoft.aspnetcore.cryptography.keyderivation.5.0.5.nupkg.sha512",

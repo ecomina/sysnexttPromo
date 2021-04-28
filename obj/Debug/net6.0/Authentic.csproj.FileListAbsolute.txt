@@ -82,3 +82,4 @@ E:\dev\netCore_api\Authentic\obj\Debug\net6.0\Authentic.dll
 E:\dev\netCore_api\Authentic\obj\Debug\net6.0\ref\Authentic.dll
 E:\dev\netCore_api\Authentic\obj\Debug\net6.0\Authentic.pdb
 E:\dev\netCore_api\Authentic\obj\Debug\net6.0\Authentic.genruntimeconfig.cache
+E:\dev\netCore_api\Authentic\bin\Debug\net6.0\Microsoft.AspNetCore.Authentication.Certificate.dll

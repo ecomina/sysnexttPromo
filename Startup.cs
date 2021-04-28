@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Authentic.Configuration;
 using Authentic.DAL;
+using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -33,14 +34,17 @@ namespace Authentic
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //  services.AddAuthentication(
+            //     CertificateAuthenticationDefaults.AuthenticationScheme)
+            //     .AddCertificate();
 
-            services.AddCors(options =>
-            {
-                options.AddPolicy("EnableCORS", builder =>
-                {
-                    builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().Build();
-                });
-            });
+            // services.AddCors(options =>
+            // {
+            //     options.AddPolicy("EnableCORS", builder =>
+            //     {
+            //         builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().Build();
+            //     });
+            // });
 
             services.Configure<JwtConfig>(Configuration.GetSection("JwtConfig"));
 
@@ -87,9 +91,15 @@ namespace Authentic
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Authentic v1"));
             }
 
-            app.UseCors("EnableCORS");
+            // app.UseCors("EnableCORS");
+            
+            app.UseCors(x => x
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
 
             app.UseHttpsRedirection();
+
 
             app.UseRouting();
             app.UseAuthentication();
