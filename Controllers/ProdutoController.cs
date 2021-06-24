@@ -103,4 +103,92 @@ public class ProdutoController : ControllerBase
             return list;
         } 
 
+        [HttpGet]
+        [Route("ListNivel")]
+        [AllowAnonymous]
+        public IEnumerable<dynamic> ListNivel(string nivel, string filtroPai = "0")
+        {
+            var context = new DaoContext();
+            var list = new List<dynamic>();
+
+            switch (nivel)
+            {
+                case "ramoAtividades":
+                    var ramoAtividades = RamoAtividades().Select(s => new {
+                        s.Id,
+                        s.Descricao,
+                        PaiId = 0,
+                        PaiDescricao = "",
+                        QtdeProdutos = s.QtdeSegmentos});
+
+                    list.AddRange(ramoAtividades);
+
+                        break;
+                case "segmentos":
+                    var segmentos = context.Segmentos.Include(s => s.Secoes).ThenInclude(s => s.Produtos).Select(s => new {
+                        s.Id,
+                        s.Descricao,
+                        PaiId = s.RamoAtividade.Id,
+                        PaiDescricao = s.RamoAtividade.Descricao,
+                        QtdeProdutos = s.Secoes.Count});
+
+                    list.AddRange(segmentos);                
+                    break;
+                case "secoes":
+                    var filtro = filtroPai.Split(',').Select(int.Parse).ToList();
+
+                    var secoes = context.Secoes.Include(s => s.Produtos).Where(f => filtro.Contains((filtroPai != "0") ? f.Segmento.Id : 0)).Select(s => new {
+                        s.Id,
+                        s.Descricao,
+                        PaiId = s.Segmento.Id,
+                        PaiDescricao = s.Segmento.Descricao,
+                        QtdeProdutos = s.Especies.Count});
+                
+                    list.AddRange(secoes);                
+                    break;                
+                case "especies":
+                    var especies = context.Especies.Include(p => p.Produtos).Select(s => new {
+                        s.Id,
+                        s.Descricao,
+                        PaiId = s.Secao.Id,
+                        PaiDescricao = s.Secao.Descricao,
+                        QtdeProdutos = s.Produtos.Count});
+
+                    list.AddRange(especies);      
+                    break;
+                case "marcas":
+                    var marcas = Marcas().Select(s => new {
+                        s.Id,
+                        s.Descricao,
+                        PaiId = 0,
+                        PaiDescricao = "",
+                        QtdeProdutos = s.QtdeProdutos});
+
+                    list.AddRange(marcas);      
+                        break;            
+              case "cores":
+                    var cores = context.Cores.Select(s => new {
+                        s.Id,
+                        s.Descricao,
+                        PaiId = 0,
+                        PaiDescricao = "",
+                        QtdeProdutos = 0});
+
+                    list.AddRange(cores);      
+                    break;              
+              case "tamanhos":
+                    var tamanhos = context.Tamanhos.Select(s => new {
+                        s.Id,
+                        s.Descricao,
+                        PaiId = 0,
+                        PaiDescricao = "",
+                        QtdeProdutos = 0});
+
+                    list.AddRange(tamanhos);      
+                    break;                  
+            }
+
+            return list;
+        } 
+
 }

@@ -12,6 +12,8 @@ namespace Authentic.DAL
         public DbSet<FormaPagamento> FormasPagamento { get; set;}
         public DbSet<TipoPagamento> TiposPagamento { get; set;}
         public DbSet<Marca> Marcas { get; set;}
+        public DbSet<Cor> Cores { get; set;}
+        public DbSet<Tamanho> Tamanhos { get; set;}
         public DbSet<Produto> Produtos { get; set;}
         public DbSet<RamoAtividade> RamosAtividades { get; set;}   
         public DbSet<Segmento> Segmentos { get; set;}
@@ -70,6 +72,12 @@ namespace Authentic.DAL
 
             modelBuilder.Entity<Marca>().ToTable("Marca");
             modelBuilder.Entity<Marca>().Property(p => p.Id).HasColumnName("ID").HasColumnType("smallint");
+
+            modelBuilder.Entity<Cor>().ToTable("Cor");
+            modelBuilder.Entity<Cor>().Property(p => p.Id).HasColumnName("ID").HasColumnType("smallint");
+
+            modelBuilder.Entity<Tamanho>().ToTable("Tamanho");
+            modelBuilder.Entity<Tamanho>().Property(p => p.Id).HasColumnName("ID").HasColumnType("smallint");
 
             modelBuilder.Entity<RamoAtividade>().ToTable("RamoAtividade");
             modelBuilder.Entity<RamoAtividade>().Property(p => p.Id).HasColumnName("ID").HasColumnType("smallint");
