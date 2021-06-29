@@ -118,7 +118,7 @@ public class ProdutoController : ControllerBase
                         s.Id,
                         s.Descricao,
                         PaiId = 0,
-                        PaiDescricao = "",
+                        PaiDescricao = "Ramo Atividade",
                         QtdeProdutos = s.QtdeSegmentos});
 
                     list.AddRange(ramoAtividades);
