@@ -111,6 +111,11 @@ public class ProdutoController : ControllerBase
             var context = new DaoContext();
             var list = new List<dynamic>();
 
+            if (filtroPai == null)
+                filtroPai = "0";
+
+            var filtro = filtroPai.Split(',').Select(int.Parse).ToList();
+
             switch (nivel)
             {
                 case "ramoAtividades":
@@ -125,7 +130,7 @@ public class ProdutoController : ControllerBase
 
                         break;
                 case "segmentos":
-                    var segmentos = context.Segmentos.Include(s => s.Secoes).ThenInclude(s => s.Produtos).Select(s => new {
+                    var segmentos = context.Segmentos.Include(s => s.Secoes).ThenInclude(s => s.Produtos).Where(f => filtro.Contains((filtroPai != "0") ? f.RamoAtividade.Id : 0)).Select(s => new {
                         s.Id,
                         s.Descricao,
                         PaiId = s.RamoAtividade.Id,
@@ -135,7 +140,6 @@ public class ProdutoController : ControllerBase
                     list.AddRange(segmentos);                
                     break;
                 case "secoes":
-                    var filtro = filtroPai.Split(',').Select(int.Parse).ToList();
 
                     var secoes = context.Secoes.Include(s => s.Produtos).Where(f => filtro.Contains((filtroPai != "0") ? f.Segmento.Id : 0)).Select(s => new {
                         s.Id,
@@ -147,7 +151,7 @@ public class ProdutoController : ControllerBase
                     list.AddRange(secoes);                
                     break;                
                 case "especies":
-                    var especies = context.Especies.Include(p => p.Produtos).Select(s => new {
+                    var especies = context.Especies.Include(p => p.Produtos).Where(f => filtro.Contains((filtroPai != "0") ? f.Secao.Id : 0)).Select(s => new {
                         s.Id,
                         s.Descricao,
                         PaiId = s.Secao.Id,
