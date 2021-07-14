@@ -38,6 +38,28 @@ public class ProdutoController : ControllerBase
         }
 
         [HttpGet]
+        [Route("Cores")]
+        [AllowAnonymous]
+        public IEnumerable<dynamic> Cores()
+        {
+            var context = new DaoContext();
+            var list = context.Cores.ToList();
+
+            return list;
+        }
+
+        [HttpGet]
+        [Route("Tamanhos")]
+        [AllowAnonymous]
+        public IEnumerable<dynamic> Tamanhos()
+        {
+            var context = new DaoContext();
+            var list = context.Tamanhos.ToList();
+
+            return list;
+        }
+
+        [HttpGet]
         [Route("RamoAtividades")]
         [AllowAnonymous]
         public IEnumerable<dynamic> RamoAtividades()
