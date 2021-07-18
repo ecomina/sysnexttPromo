@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Authentic.DAL;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -92,7 +93,7 @@ public class ProdutoController : ControllerBase
         [HttpGet]
         [Route("ListHierarquia")]
         [AllowAnonymous]
-        public IEnumerable<dynamic> ListHierarquia(string nome, string pais = "0")
+        public IEnumerable<dynamic> ListHierarquia(string nivel, string pais = "0")
         {
             List<int> listPai = new List<int>();
 
@@ -106,7 +107,7 @@ public class ProdutoController : ControllerBase
 
             IEnumerable<dynamic> list = null;
 
-            switch(nome)
+            switch(nivel)
             {
                 case "ram":
                     list = GetRamoAtividades(listPai);
@@ -120,7 +121,7 @@ public class ProdutoController : ControllerBase
                 case "esp":
                     list = GetEspecies(listPai);
                     break;
-                default:
+                default:    
                     list = null;
                     break;
             }
@@ -313,6 +314,8 @@ public class ProdutoController : ControllerBase
             else
                 return context.Especies.Where(s => pais.Contains(s.Secao.Id)).Include(i => i.Secao).ToList();
         }  
+
+
 
         #endregion
 
