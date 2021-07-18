@@ -92,9 +92,12 @@ public class ProdutoController : ControllerBase
         [HttpGet]
         [Route("ListHierarquia")]
         [AllowAnonymous]
-        public IEnumerable<dynamic> ListHierarquia(string nome, string pais)
+        public IEnumerable<dynamic> ListHierarquia(string nome, string pais = "0")
         {
             List<int> listPai = new List<int>();
+
+            if (pais == null)
+                pais = "0";
 
             if (pais != "0")
                 listPai.AddRange(pais.Split(',').Select(int.Parse).ToList());
@@ -290,25 +293,25 @@ public class ProdutoController : ControllerBase
         private IEnumerable<Segmento> GetSegmentos(List<int> pais)
         {
             if (pais.Count == 0)
-                return context.Segmentos.ToList();
+                return context.Segmentos.Include(i => i.RamoAtividade).ToList();
             else
-                return context.Segmentos.Where(s => pais.Contains(s.RamoAtividade.Id)).ToList();
+                return context.Segmentos.Where(s => pais.Contains(s.RamoAtividade.Id)).Include(i => i.RamoAtividade).ToList();
         }
 
         private IEnumerable<Secao> GetSecoes(List<int> pais)
         {
             if (pais.Count == 0)
-                return context.Secoes.ToList();
+                return context.Secoes.Include(i => i.Segmento).ToList();
             else
-                return context.Secoes.Where(s => pais.Contains(s.Segmento.Id)).Include(s => s.Segmento).ToList();
+                return context.Secoes.Where(s => pais.Contains(s.Segmento.Id)).Include(i => i.Segmento).ToList();
         }
 
         private IEnumerable<Especie> GetEspecies(List<int> pais)
         {
             if (pais.Count == 0)
-                return context.Especies.ToList();
+                return context.Especies.Include(i => i.Secao).ToList();
             else
-                return context.Especies.Where(s => pais.Contains(s.Secao.Id)).ToList();
+                return context.Especies.Where(s => pais.Contains(s.Secao.Id)).Include(i => i.Secao).ToList();
         }  
 
         #endregion

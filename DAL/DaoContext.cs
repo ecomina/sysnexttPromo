@@ -86,14 +86,14 @@ namespace Authentic.DAL
             modelBuilder.Entity<RamoAtividade>().ToTable("RamoAtividade");
             modelBuilder.Entity<RamoAtividade>().Property(p => p.Id).HasColumnName("ID").HasColumnType("smallint");
 
-            modelBuilder.Entity<Segmento>().ToTable("Segmento");
+            modelBuilder.Entity<Segmento>().ToTable("Segmento").HasKey(pk => pk.Id);
             modelBuilder.Entity<Segmento>().Property(p => p.Id).HasColumnName("ID").HasColumnType("smallint");
             modelBuilder.Entity<Segmento>()
                 .HasOne(o => o.RamoAtividade)
                 .WithMany(m => m.Segmentos )
                 .HasForeignKey("IDRamoAtividade"); 
 
-            modelBuilder.Entity<Secao>().ToTable("Secao");
+            modelBuilder.Entity<Secao>().ToTable("Secao").HasKey(pk => pk.Id);
             modelBuilder.Entity<Secao>().Property(p => p.Id).HasColumnName("ID").HasColumnType("smallint");
             modelBuilder.Entity<Secao>()
                 .HasOne(o => o.Segmento)
