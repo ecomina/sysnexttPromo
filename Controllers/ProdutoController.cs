@@ -21,7 +21,6 @@ public class ProdutoController : ControllerBase
             return list.ToList();
         }
         
-
         [HttpGet]
         [Route("Marcas")]
         [AllowAnonymous]
@@ -73,7 +72,6 @@ public class ProdutoController : ControllerBase
 
             return list;
         }        
-
         [HttpGet]
         [Route("Segmentos")]
         [AllowAnonymous]
@@ -87,6 +85,42 @@ public class ProdutoController : ControllerBase
                 RamoAtividadeDescricao = s.RamoAtividade.Descricao,
                 QtdeProdutos = s.Secoes.Count
             });
+
+            return list;
+        }
+
+        [HttpGet]
+        [Route("ListHierarquia")]
+        [AllowAnonymous]
+        public IEnumerable<dynamic> ListHierarquia(string nome, string pais)
+        {
+            List<int> listPai = new List<int>();
+
+            if (pais != "0")
+                listPai.AddRange(pais.Split(',').Select(int.Parse).ToList());
+
+            var context = new DaoContext();
+
+            IEnumerable<dynamic> list = null;
+
+            switch(nome)
+            {
+                case "ram":
+                    list = GetRamoAtividades(listPai);
+                    break;
+                case "seg":
+                    list = GetSegmentos(listPai);
+                    break;
+                case "sec":
+                    list = GetSecoes(listPai);
+                    break;
+                case "esp":
+                    list = GetEspecies(listPai);
+                    break;
+                default:
+                    list = null;
+                    break;
+            }
 
             return list;
         }      
@@ -216,5 +250,67 @@ public class ProdutoController : ControllerBase
 
             return list;
         } 
+
+        [HttpPost]
+        [Route("New")]
+        [AllowAnonymous]
+        public dynamic New(short idSec, short idEsp)
+        {
+            var context = new DaoContext();
+
+            Especie esp = context.Especies.Where(s => s.IDSecao == idSec && s.Id == idEsp).Include(s=> s.Secao).FirstOrDefault();
+            Marca mar = context.Marcas.Where(s => s.Id == 1).FirstOrDefault();
+            UnidadeMedida und = context.UnidadeMedidas.Where(s => s.Id == 1).FirstOrDefault();
+
+            Produto prd = new Produto();
+            prd.Secao = esp.Secao;
+            prd.Especie = esp;
+            prd.Marca = mar;
+            prd.Descricao = "Teste";
+            prd.UnidadeMedida = und;
+            prd.Referencia = "1020";    
+            prd.Tipo = "PP";
+            prd.Status = "I";
+            prd.Ativo = true;
+            prd.Codigo = 1;
+
+            // context.Produtos.Add(prd);
+            // context.SaveChanges();
+
+            return prd;
+        }
+
+        #region Methods Privates
+
+        private IEnumerable<RamoAtividade> GetRamoAtividades(List<int> pais)
+        {
+            return context.RamosAtividades.ToList();
+        }
+
+        private IEnumerable<Segmento> GetSegmentos(List<int> pais)
+        {
+            if (pais.Count == 0)
+                return context.Segmentos.ToList();
+            else
+                return context.Segmentos.Where(s => pais.Contains(s.RamoAtividade.Id)).ToList();
+        }
+
+        private IEnumerable<Secao> GetSecoes(List<int> pais)
+        {
+            if (pais.Count == 0)
+                return context.Secoes.ToList();
+            else
+                return context.Secoes.Where(s => pais.Contains(s.Segmento.Id)).Include(s => s.Segmento).ToList();
+        }
+
+        private IEnumerable<Especie> GetEspecies(List<int> pais)
+        {
+            if (pais.Count == 0)
+                return context.Especies.ToList();
+            else
+                return context.Especies.Where(s => pais.Contains(s.Secao.Id)).ToList();
+        }  
+
+        #endregion
 
 }

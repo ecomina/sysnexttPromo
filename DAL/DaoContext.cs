@@ -19,6 +19,7 @@ namespace Authentic.DAL
         public DbSet<Segmento> Segmentos { get; set;}
         public DbSet<Secao> Secoes { get; set;}
         public DbSet<Especie> Especies { get; set;}
+        public DbSet<UnidadeMedida> UnidadeMedidas { get; set;}
         public DbSet<Promocao> Promocoes { get; set;}
         public DbSet<PromocaoFilial> PromocaoFiliais { get; set;}
         public DbSet<PromocaoRegra> PromocaoRegras { get; set;}
@@ -70,6 +71,9 @@ namespace Authentic.DAL
                 .WithMany(f => f.Tipos)
                 .HasForeignKey("IDFormaPagamento");
 
+            modelBuilder.Entity<UnidadeMedida>().ToTable("UnidadeMedida");
+            modelBuilder.Entity<UnidadeMedida>().Property(p => p.Id).HasColumnName("ID").HasColumnType("smallint");                
+
             modelBuilder.Entity<Marca>().ToTable("Marca");
             modelBuilder.Entity<Marca>().Property(p => p.Id).HasColumnName("ID").HasColumnType("smallint");
 
@@ -117,7 +121,12 @@ namespace Authentic.DAL
             modelBuilder.Entity<Produto>()
                 .HasOne(o => o.Marca)
                 .WithMany(m => m.Produtos)
-                .HasForeignKey("IDMarca");                                              
+                .HasForeignKey("IDMarca");  
+            modelBuilder.Entity<Produto>()
+                .HasOne(o => o.UnidadeMedida)
+                .WithMany(m => m.Produtos)
+                .HasForeignKey("IDUnidadeMedida");                  
+
 
             modelBuilder.Entity<Promocao>().ToTable("Promocao");
             modelBuilder.Entity<Promocao>().Property(p => p.Id).HasColumnName("ID").HasColumnType("Int").UseIdentityColumn(1,1);
