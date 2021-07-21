@@ -7,4 +7,6 @@ public class Especie
     public short IDSecao { get; set; }
     public string Descricao { get; set; }
     public List<Produto> Produtos { get; set; }
+    
+    public List<ProdutoCodigo> ProdutoCodigos { get; set; }
 }

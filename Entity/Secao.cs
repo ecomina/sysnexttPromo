@@ -8,5 +8,6 @@ public class Secao
     public string Descricao { get; set; }
     public List<Especie> Especies { get; set; }
     public List<Produto> Produtos { get; set; }
+    public List<ProdutoCodigo> ProdutoCodigos { get; set; }
 }
 

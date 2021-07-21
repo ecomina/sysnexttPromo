@@ -16,7 +16,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Authentic.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("v1/[controller]")]
     [ApiController]
     public class AuthManagementController : ControllerBase
     {

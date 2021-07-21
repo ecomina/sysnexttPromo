@@ -3,12 +3,14 @@ public class Produto
     #region Contructor
 
     public Produto() {}
-    public Produto(Especie esp)
+    public Produto(ProdutoCodigo pdc)
     {
-        this.Secao = esp.Secao;
-        this.Especie = esp;
-        this.IDEspecie = esp.Id;
-        this.IDSecao = esp.IDSecao;
+        this.Id = pdc.Id;
+        this.Secao = pdc.Secao;
+        this.IDSecao = pdc.Secao.Id;
+        this.Especie = pdc.Especie;
+        this.IDEspecie = pdc.Especie.Id;
+        this.Codigo = pdc.Codigo;
     }
 
     #endregion

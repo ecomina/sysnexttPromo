@@ -14,6 +14,7 @@ namespace Authentic.DAL
         public DbSet<Marca> Marcas { get; set;}
         public DbSet<Cor> Cores { get; set;}
         public DbSet<Tamanho> Tamanhos { get; set;}
+        public DbSet<ProdutoCodigo> ProdutoCodigos { get; set;}
         public DbSet<Produto> Produtos { get; set;}
         public DbSet<RamoAtividade> RamosAtividades { get; set;}   
         public DbSet<Segmento> Segmentos { get; set;}
@@ -29,7 +30,6 @@ namespace Authentic.DAL
         public DbSet<PromocaoProduto> PromocaoProdutos { get; set;}
         public DbSet<PromocaoProdutoMarca> PromocaoProdutoMarcas { get; set;}
 
-
         public DaoContext()
         {
         } 
@@ -41,7 +41,6 @@ namespace Authentic.DAL
         {
             options.UseSqlServer("Data Source=ECOMINA-DELL\\SQLEXPRESS;Initial Catalog=NexttPromo;User ID=sa;Password=nexttsol");
         }
-
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -125,8 +124,18 @@ namespace Authentic.DAL
             modelBuilder.Entity<Produto>()
                 .HasOne(o => o.UnidadeMedida)
                 .WithMany(m => m.Produtos)
-                .HasForeignKey("IDUnidadeMedida");                  
+                .HasForeignKey("IDUnidadeMedida");          
 
+            modelBuilder.Entity<ProdutoCodigo>().ToTable("ProdutoCodigo");
+            modelBuilder.Entity<ProdutoCodigo>().Property(p => p.Id).HasColumnName("ID").HasColumnType("Int");       
+            modelBuilder.Entity<ProdutoCodigo>()
+                .HasOne(o => o.Secao)
+                .WithMany(m => m.ProdutoCodigos)
+                .HasForeignKey("IDSecao");  
+            modelBuilder.Entity<ProdutoCodigo>()
+                .HasOne(o => o.Especie)
+                .WithMany(m => m.ProdutoCodigos)
+                .HasForeignKey(fk => new {fk.IDSecao, fk.IDEspecie});                   
 
             modelBuilder.Entity<Promocao>().ToTable("Promocao");
             modelBuilder.Entity<Promocao>().Property(p => p.Id).HasColumnName("ID").HasColumnType("Int").UseIdentityColumn(1,1);

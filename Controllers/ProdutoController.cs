@@ -258,28 +258,35 @@ public class ProdutoController : ControllerBase
         [HttpPost]
         [Route("New")]
         [AllowAnonymous]
-        public dynamic New(short idSec, short idEsp)
+        public dynamic New(short secao, short especie, string tipo)
         {
             var context = new DaoContext();
 
-            Especie esp = context.Especies.Where(s => s.IDSecao == idSec && s.Id == idEsp).Include(s=> s.Secao).FirstOrDefault();
-            Marca mar = context.Marcas.Where(s => s.Id == 1).FirstOrDefault();
+            int codigoNew = 1;
+            IQueryable<ProdutoCodigo> produtoCodigo = context.ProdutoCodigos.Where(p => p.IDSecao == secao && p.IDEspecie == especie).DefaultIfEmpty();
+            
+            if (produtoCodigo.ToList()[0] != null)
+            {
+                codigoNew += produtoCodigo.Max(m => m.Codigo);
+            }
+
+            Especie esp = context.Especies.Where(s => s.IDSecao == secao && s.Id == especie).Include(s=> s.Secao).FirstOrDefault();
             UnidadeMedida und = context.UnidadeMedidas.Where(s => s.Id == 1).FirstOrDefault();
 
-            Produto prd = new Produto();
-            prd.Secao = esp.Secao;
-            prd.Especie = esp;
-            prd.Marca = mar;
-            prd.Descricao = "Teste";
-            prd.UnidadeMedida = und;
-            prd.Referencia = "1020";    
-            prd.Tipo = "PP";
-            prd.Status = "I";
-            prd.Ativo = true;
-            prd.Codigo = 1;
+            ProdutoCodigo pdc = new ProdutoCodigo();
+            pdc.Secao = esp.Secao;
+            pdc.Especie = esp;
+            pdc.Codigo = codigoNew;
 
-            // context.Produtos.Add(prd);
-            // context.SaveChanges();
+            context.ProdutoCodigos.Add(pdc);
+            context.SaveChanges();
+
+            Produto prd = new Produto(pdc);
+            prd.UnidadeMedida = und;
+            prd.Tipo = "PP";
+            prd.Status = "IN";
+            prd.Tipo = tipo;
+            prd.Ativo = true;
 
             return prd;
         }
@@ -314,8 +321,6 @@ public class ProdutoController : ControllerBase
             else
                 return context.Especies.Where(s => pais.Contains(s.Secao.Id)).Include(i => i.Secao).ToList();
         }  
-
-
 
         #endregion
 
