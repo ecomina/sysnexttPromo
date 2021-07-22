@@ -21,7 +21,18 @@ public class ProdutoController : ControllerBase
 
             return list.ToList();
         }
-        
+
+        [HttpGet]
+        [Route("UnidadeMedidas")]
+        [AllowAnonymous]
+        public IEnumerable<dynamic> UnidadeMedidas()
+        {
+            var context = new DaoContext();
+            var list = context.UnidadeMedidas.ToList();
+
+            return list;
+        }
+
         [HttpGet]
         [Route("Marcas")]
         [AllowAnonymous]
