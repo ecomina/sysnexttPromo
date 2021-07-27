@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -5,6 +6,11 @@ using Authentic.DAL;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+
+public class ListParametrs {
+    public bool Ativo {get; set;}
+}
+
 
 [Route("v1/Produto")]
 public class ProdutoController : ControllerBase 
@@ -90,7 +96,7 @@ public class ProdutoController : ControllerBase
         public IEnumerable<dynamic> Segmentos()
         {
             var context = new DaoContext();
-            var list = context.Segmentos.Include(s => s.Secoes).ThenInclude(s => s.Produtos).Select(s => new {
+            var list = context.Segmentos.Include(s => s.Secoes).ThenInclude(s => s.Especies).Select(s => new {
                 s.Id,
                 s.Descricao,
                 RamoAtividadeId = s.RamoAtividade.Id,
@@ -146,12 +152,12 @@ public class ProdutoController : ControllerBase
         public IEnumerable<dynamic> Secoes()
         {
             var context = new DaoContext();
-            var list = context.Secoes.Include(s => s.Produtos).Select(s => new {
+            var list = context.Secoes.Include(s => s.Especies).Select(s => new {
                 s.Id,
                 s.Descricao,
                 SegmentoId = s.Segmento.Id,
                 SegmentoDescricao = s.Segmento.Descricao,
-                QtdeProdutos = s.Produtos.Count
+                QtdeProdutos = s.Especies.Count
             });
 
             return list;
@@ -166,6 +172,7 @@ public class ProdutoController : ControllerBase
             var list = context.Especies.Include(p => p.Produtos).Select(s => new {
                 s.Id,
                 s.Descricao,
+                s.Codigo,
                 SecaoId = s.Secao.Id,
                 SecaoDescricao = s.Secao.Descricao,
                 QtdeProdutos = s.Produtos.Count
@@ -201,7 +208,7 @@ public class ProdutoController : ControllerBase
 
                         break;
                 case "segmentos":
-                    var segmentos = context.Segmentos.Include(s => s.Secoes).ThenInclude(s => s.Produtos).Where(f => filtro.Contains((filtroPai != "0") ? f.RamoAtividade.Id : 0)).Select(s => new {
+                    var segmentos = context.Segmentos.Include(s => s.Secoes).ThenInclude(s => s.Especies).Where(f => filtro.Contains((filtroPai != "0") ? f.RamoAtividade.Id : 0)).Select(s => new {
                         s.Id,
                         s.Descricao,
                         PaiId = s.RamoAtividade.Id,
@@ -212,7 +219,7 @@ public class ProdutoController : ControllerBase
                     break;
                 case "secoes":
 
-                    var secoes = context.Secoes.Include(s => s.Produtos).Where(f => filtro.Contains((filtroPai != "0") ? f.Segmento.Id : 0)).Select(s => new {
+                    var secoes = context.Secoes.Include(s => s.Especies).Where(f => filtro.Contains((filtroPai != "0") ? f.Segmento.Id : 0)).Select(s => new {
                         s.Id,
                         s.Descricao,
                         PaiId = s.Segmento.Id,
@@ -266,41 +273,95 @@ public class ProdutoController : ControllerBase
             return list;
         } 
 
-        [HttpPost]
+        [HttpGet]
         [Route("New")]
         [AllowAnonymous]
-        public dynamic New(short secao, short especie, string tipo)
+        public int New(string especie)
         {
+
             var context = new DaoContext();
 
             int codigoNew = 1;
-            IQueryable<ProdutoCodigo> produtoCodigo = context.ProdutoCodigos.Where(p => p.IDSecao == secao && p.IDEspecie == especie).DefaultIfEmpty();
+            IQueryable<ProdutoCodigo> produtoCodigo = context.ProdutoCodigos.Where(p => p.IDEspecie ==  Int32.Parse(especie)).DefaultIfEmpty();
             
             if (produtoCodigo.ToList()[0] != null)
             {
                 codigoNew += produtoCodigo.Max(m => m.Codigo);
             }
 
-            Especie esp = context.Especies.Where(s => s.IDSecao == secao && s.Id == especie).Include(s=> s.Secao).FirstOrDefault();
-            UnidadeMedida und = context.UnidadeMedidas.Where(s => s.Id == 1).FirstOrDefault();
+            Especie esp = context.Especies.Where(s => s.Id ==  Int32.Parse(especie)).Include(s=> s.Secao).FirstOrDefault();
 
             ProdutoCodigo pdc = new ProdutoCodigo();
-            pdc.Secao = esp.Secao;
             pdc.Especie = esp;
             pdc.Codigo = codigoNew;
+
+
 
             context.ProdutoCodigos.Add(pdc);
             context.SaveChanges();
 
             Produto prd = new Produto(pdc);
-            prd.UnidadeMedida = und;
-            prd.Tipo = "PP";
-            prd.Status = "IN";
-            prd.Tipo = tipo;
-            prd.Ativo = true;
+            prd.Descricao = "Produto teste";
+            context.Produtos.Add(prd);
+            context.SaveChanges();
 
-            return prd;
+            return prd.Id;
         }
+
+        [HttpGet]
+        [Route("GetId")]
+        [AllowAnonymous]
+        public dynamic GetId(int id)
+        {
+            var produto = context.Produtos.Where(p => p.Id == id).Include(e => e.Especie).ThenInclude(s => s.Secao).ThenInclude(s => s.Segmento).ThenInclude(r => r.RamoAtividade).Include(m => m.Marca).Include(u => u.UnidadeMedida).FirstOrDefault(); 
+            var especie =  new { 
+                        produto.Especie.Id, 
+                        produto.Especie.Descricao,
+                        Secao = new {
+                            produto.Especie.Secao.Id,
+                            produto.Especie.Secao.Descricao,
+                        }};
+
+
+            var result = new {
+                produto = new {
+                    produto.Id,
+                    produto.DataCadastro,
+                    Especie = especie,
+                    produto.Codigo,
+                    produto.Descricao,
+                    produto.Ativo,
+                    produto.Status,
+                    produto.MateriaPrima,
+                    produto.Referencia,
+                    Marca = (produto.Marca == null) ? null : new {produto.Marca.Id, produto.Marca.Descricao },
+                    UnidadeMedida = (produto.UnidadeMedida == null) ? null : new { produto.UnidadeMedida.Id, produto.UnidadeMedida.Unidade} 
+                }
+            };
+
+            return result;
+        }
+
+        [HttpGet]
+        [Route("List")]
+        [AllowAnonymous]
+        public IEnumerable<dynamic>  List()
+        {
+            var produtos = context.Produtos.Include(p => p.Especie).ThenInclude(s => s.Secao).Include(p => p.Marca).DefaultIfEmpty();
+
+            var list = produtos.Select(p => new {
+                p.Id,
+                p.Descricao,
+                p.CodigoInterno,
+                p.Ativo,
+                p.Status,
+                MarcaId = (p.Marca == null) ? 0 : p.Marca.Id,
+                MarcaDescricao = p.Marca.Descricao
+            });
+
+            return list;
+        }
+
 
         #region Methods Privates
 

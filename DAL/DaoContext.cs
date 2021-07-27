@@ -99,8 +99,8 @@ namespace Authentic.DAL
                 .WithMany(m => m.Secoes )
                 .HasForeignKey("IDSegmento");
 
-            modelBuilder.Entity<Especie>().ToTable("Especie").HasKey(pk => new {pk.Id, pk.IDSecao});
-            modelBuilder.Entity<Especie>().Property(p => p.Id).HasColumnName("ID").HasColumnType("smallint");
+            modelBuilder.Entity<Especie>().ToTable("Especie").HasKey(pk => new {pk.Id});
+            modelBuilder.Entity<Especie>().Property(p => p.Id).HasColumnName("ID").HasColumnType("int");
             modelBuilder.Entity<Especie>()
                 .HasOne(o => o.Secao)
                 .WithMany(m => m.Especies)
@@ -108,14 +108,14 @@ namespace Authentic.DAL
 
             modelBuilder.Entity<Produto>().ToTable("Produto").HasKey(pk => pk.Id);
             modelBuilder.Entity<Produto>().Property(p => p.Id).HasColumnName("ID").HasColumnType("Int");
-            modelBuilder.Entity<Produto>()
-                .HasOne(o => o.Secao)
-                .WithMany(m => m.Produtos)
-                .HasForeignKey("IDSecao");  
+            // modelBuilder.Entity<Produto>()
+            //     .HasOne(o => o.Secao)
+            //     .WithMany(m => m.Produtos)
+            //     .HasForeignKey("IDSecao");  
             modelBuilder.Entity<Produto>()
                 .HasOne(o => o.Especie)
                 .WithMany(m => m.Produtos)
-                .HasForeignKey(fk => new {fk.IDSecao, fk.IDEspecie});  
+                .HasForeignKey("IDEspecie"); 
             modelBuilder.Entity<Produto>()
                 .HasOne(o => o.Marca)
                 .WithMany(m => m.Produtos)
@@ -126,15 +126,11 @@ namespace Authentic.DAL
                 .HasForeignKey("IDUnidadeMedida");          
 
             modelBuilder.Entity<ProdutoCodigo>().ToTable("ProdutoCodigo").HasKey(pk => pk.Id);
-            modelBuilder.Entity<ProdutoCodigo>().Property(p => p.Id).HasColumnName("ID").HasColumnType("Int");       
-            modelBuilder.Entity<ProdutoCodigo>()
-                .HasOne(o => o.Secao)
-                .WithMany(m => m.ProdutoCodigos)
-                .HasForeignKey("IDSecao");  
+            modelBuilder.Entity<ProdutoCodigo>().Property(p => p.Id).HasColumnName("ID").HasColumnType("Int").UseIdentityColumn(1,1) ;       
             modelBuilder.Entity<ProdutoCodigo>()
                 .HasOne(o => o.Especie)
                 .WithMany(m => m.ProdutoCodigos)
-                .HasForeignKey(fk => new {fk.IDSecao, fk.IDEspecie});                   
+                .HasForeignKey("IDEspecie");                   
 
             modelBuilder.Entity<Promocao>().ToTable("Promocao");
             modelBuilder.Entity<Promocao>().Property(p => p.Id).HasColumnName("ID").HasColumnType("Int").UseIdentityColumn(1,1);
