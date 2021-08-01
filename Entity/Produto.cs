@@ -10,7 +10,6 @@ public class Produto
         this.Id = pdc.Id;
         this.DataCadastro = DateTime.Now;
         this.Especie = pdc.Especie;
-        this.IDEspecie = pdc.Especie.Id;
         this.Codigo = pdc.Codigo;
         this.MateriaPrima = false;
         this.Ativo = false;
@@ -23,7 +22,6 @@ public class Produto
 
     public int Id { get; set; }
     public DateTime DataCadastro { get; set; }
-    public int IDEspecie { get; set; }    
     public Especie Especie { get; set; }    
     public Secao Secao {
         get {
@@ -34,7 +32,6 @@ public class Produto
         }
     }
     public int Codigo { get; set; }
-    public int IDMarca { get; set; }
     public Marca Marca { get; set; }
     public string Descricao { get; set; }
     public string Referencia { get; set; }

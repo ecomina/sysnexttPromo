@@ -15736,7 +15736,7 @@
         }
       }
     ],
-    "CSharpLanguageVersion": 900
+    "CSharpLanguageVersion": 1000
   },
   "RootNamespace": "Authentic",
   "Documents": [],

@@ -6,6 +6,7 @@ using Authentic.DAL;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 public class ListParametrs {
     public bool Ativo {get; set;}
@@ -166,16 +167,28 @@ public class ProdutoController : ControllerBase
         [HttpGet]
         [Route("Especies")]
         [AllowAnonymous]
-        public IEnumerable<dynamic> Especies()
+        public IEnumerable<dynamic> Especies(int id = 0, short[] secoes = null)
         {
+            List<short> listSecoes = new List<short>();
+            listSecoes.Add(0);
+
+            if (secoes.Length > 0)
+            {
+                listSecoes = secoes.ToList();
+            }
+
             var context = new DaoContext();
-            var list = context.Especies.Include(p => p.Produtos).Select(s => new {
+            var list = context.Especies.Where(e => e.Id == ((id == 0) ? e.Id : id)).Select(s => new {
                 s.Id,
                 s.Descricao,
                 s.Codigo,
                 SecaoId = s.Secao.Id,
                 SecaoDescricao = s.Secao.Descricao,
-                QtdeProdutos = s.Produtos.Count
+                SegmentoId = s.Secao.Segmento.Id,
+                SegmentoDescricao = s.Secao.Segmento.Descricao,
+                RamoAtividadeId = s.Secao.Segmento.RamoAtividade.Id,
+                RamoAtividadeDescricao = s.Secao.Segmento.RamoAtividade.Descricao,
+                QtdeProdutos = 0//s.Produtos.Count
             });
 
             return list;
@@ -273,7 +286,7 @@ public class ProdutoController : ControllerBase
             return list;
         } 
 
-        [HttpGet]
+        [HttpPost]
         [Route("New")]
         [AllowAnonymous]
         public int New(string especie)
@@ -308,6 +321,33 @@ public class ProdutoController : ControllerBase
             return prd.Id;
         }
 
+        [HttpPut]
+        [AllowAnonymous]
+        public int Put([FromBody] Produto prd) {
+            //Produto prd = JsonConvert.DeserializeObject<Produto>(produto);
+            Produto produto = context.Produtos.Where(p => p.Id == prd.Id).FirstOrDefault();
+            produto.Codigo = prd.Codigo;
+            produto.Descricao = prd.Descricao;
+            produto.Referencia = prd.Referencia;
+            produto.MateriaPrima = prd.MateriaPrima;
+            produto.Ativo = prd.Ativo;
+
+            produto.Especie = context.Especies.Where(e => e.Id == prd.Especie.Id).FirstOrDefault();
+            produto.Marca = context.Marcas.Where(m => m.Id == prd.Marca.Id).FirstOrDefault();
+            produto.UnidadeMedida = context.UnidadeMedidas.Where(u => u.Id == prd.UnidadeMedida.Id).FirstOrDefault();
+
+            context.SaveChanges();
+
+            return produto.Id;
+        }
+
+        [HttpPut]
+        [AllowAnonymous]
+         [Route("Status")]
+        public string Status(int id, string status) {
+            return "";
+        }
+
         [HttpGet]
         [Route("GetId")]
         [AllowAnonymous]
@@ -317,9 +357,18 @@ public class ProdutoController : ControllerBase
             var especie =  new { 
                         produto.Especie.Id, 
                         produto.Especie.Descricao,
+                        produto.Especie.Codigo,
                         Secao = new {
                             produto.Especie.Secao.Id,
                             produto.Especie.Secao.Descricao,
+                            Segmento = new {
+                                produto.Especie.Secao.Segmento.Id,
+                                produto.Especie.Secao.Segmento.Descricao,
+                                RamoAtividade = new {
+                                    produto.Especie.Secao.Segmento.RamoAtividade.Id,
+                                    produto.Especie.Secao.Segmento.RamoAtividade.Descricao,
+                                }
+                            }
                         }};
 
 
@@ -327,14 +376,20 @@ public class ProdutoController : ControllerBase
                 produto = new {
                     produto.Id,
                     produto.DataCadastro,
-                    Especie = especie,
                     produto.Codigo,
                     produto.Descricao,
                     produto.Ativo,
                     produto.Status,
                     produto.MateriaPrima,
                     produto.Referencia,
+
+                    Especie = especie,
+                    EspecieId = (produto.Especie == null) ? 0 : produto.Especie.Id,
+
+                    MarcaId = (produto.Marca == null) ? 0 : produto.Marca.Id,
                     Marca = (produto.Marca == null) ? null : new {produto.Marca.Id, produto.Marca.Descricao },
+                    
+                    UnidadeMedidaId = (produto.UnidadeMedida == null) ? 0 : produto.UnidadeMedida.Id,
                     UnidadeMedida = (produto.UnidadeMedida == null) ? null : new { produto.UnidadeMedida.Id, produto.UnidadeMedida.Unidade} 
                 }
             };
@@ -355,6 +410,7 @@ public class ProdutoController : ControllerBase
                 p.CodigoInterno,
                 p.Ativo,
                 p.Status,
+                p.Especie,
                 MarcaId = (p.Marca == null) ? 0 : p.Marca.Id,
                 MarcaDescricao = p.Marca.Descricao
             });
@@ -386,12 +442,36 @@ public class ProdutoController : ControllerBase
                 return context.Secoes.Where(s => pais.Contains(s.Segmento.Id)).Include(i => i.Segmento).ToList();
         }
 
-        private IEnumerable<Especie> GetEspecies(List<int> pais)
+        private IEnumerable<dynamic> GetEspecies(List<int> pais)
         {
+            bool filtroPai = true;
+
             if (pais.Count == 0)
-                return context.Especies.Include(i => i.Secao).ToList();
-            else
-                return context.Especies.Where(s => pais.Contains(s.Secao.Id)).Include(i => i.Secao).ToList();
+            {
+                filtroPai = false;
+                pais.Add(0);
+            }
+
+            var list = context.Especies.Where(s => pais.Contains((filtroPai) ? s.Secao.Id : 0)).Include(i => i.Secao).ThenInclude(s => s.Segmento).ThenInclude(r => r.RamoAtividade).Select(e => new
+            {
+                e.Id,
+                e.Descricao,
+                e.Codigo,
+                Secao = new {
+                    e.Secao.Id,
+                    e.Secao.Descricao,
+                    Segmento = new {
+                        e.Secao.Segmento.Id,
+                        e.Secao.Segmento.Descricao,
+                        RamoAtividade = new {
+                            e.Secao.Segmento.RamoAtividade.Id,
+                            e.Secao.Segmento.RamoAtividade.Descricao,
+                        }
+                    }
+                }
+            }).ToList();
+
+            return list;
         }  
 
         #endregion
